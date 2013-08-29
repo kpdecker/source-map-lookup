@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+var fs = require('fs'),
+    SourceMapConsumer = require('source-map').SourceMapConsumer;
+
+var optimist = require('optimist')
+    .usage('Lookup source mapped location.\nUsage: $0 mapFile path line column\n\nExample: $0 base.js.map base.js 1 30000')
+
+    .check(function(argv) {
+      if (argv._.length != 4) {
+        throw new Error();
+      }
+    });
+
+var mapFile = optimist.argv._[0],
+    sourceMap;
+try {
+  var body = fs.readFileSync(mapFile);
+  sourceMap = new SourceMapConsumer(body.toString());
+} catch (err) {
+  throw new Error('Unable to open map file "' + mapFile + '"\n\n\n' + err.message);
+}
+
+var path = optimist.argv._[1],
+    line = optimist.argv._[2],
+    column = optimist.argv._[3];
+
+console.log(sourceMap.originalPositionFor({line: line, column: column || 1}));
