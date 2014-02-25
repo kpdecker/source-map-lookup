@@ -2,6 +2,12 @@
 
 Simple script to map source-maped file location to the original source file.
 
+## Installation
+
+```
+npm install -g source-map-lookup
+```
+
 ## Usage
 
 ```
