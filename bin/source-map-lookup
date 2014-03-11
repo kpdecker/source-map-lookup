@@ -1,7 +1,20 @@
 #!/usr/bin/env node
 
 var fs = require('fs'),
-    SourceMapConsumer = require('source-map').SourceMapConsumer;
+    SourceMapConsumer = require('source-map').SourceMapConsumer,
+    resolver = require('../lib/resolver'),
+    rewriteStream = require('../lib/rewrite-stream');
+
+// If we are getting an input pipe then assume we are in streaming mode
+if (!process.stdin.isTTY) {
+  // Kill off the source map cache every few seconds. The goal is to handle multiple consequtive
+  // map calls but to not be stuck on old maps after a rebuild.
+  setInterval(function() {
+    resolver.reset();
+  }, 2000);
+
+  return rewriteStream(process.stdin).pipe(process.stdout);
+}
 
 var optimist = require('optimist')
     .usage('Lookup source mapped location.\nUsage: $0 mapFile path line column\n\nExample: $0 base.js.map base.js 1 30000')
